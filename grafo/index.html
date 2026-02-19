@@ -1,236 +1,32 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Grafo Interactivo</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      text-align: center;
-      background: radial-gradient(circle at top, #05051a, black);
-      color: white;
-    }
-
-    h1 {
-      margin-top: 20px;
-      font-size: 42px;
-      color: cyan;
-      text-shadow: 0 0 15px cyan;
-    }
-
-    #canvas {
-      width: 90%;
-      height: 520px;
-      margin: 25px auto;
-      border-radius: 20px;
-      border: 2px solid cyan;
-      background: rgba(255, 255, 255, 0.05);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 25px rgba(0,255,255,0.4);
-    }
-
-    .node {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      position: absolute;
-      background: lime;
-      box-shadow: 0 0 15px lime;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-      color: black;
-      font-size: 18px;
-    }
-
-    button {
-      padding: 10px 18px;
-      font-size: 15px;
-      font-weight: bold;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      background: cyan;
-      color: black;
-    }
-
-    button:hover {
-      background: lime;
-    }
-  </style>
+  <title>Prueba Nodo</title>
 </head>
-
 <body>
 
-<h1>Grafo Interactivo</h1>
-<button id="clearBtn">Limpiar</button>
+<h2>Si haces clic debe aparecer un círculo</h2>
 
-<div id="canvas"></div>
+<div id="area" style="width:500px;height:300px;border:3px solid red;"></div>
 
 <script>
-  const canvas = document.getElementById("canvas");
-  const clearBtn = document.getElementById("clearBtn");
+  const area = document.getElementById("area");
 
-  let nodes = [];
-  let selectedNode = null;
+  area.addEventListener("click", function(e) {
 
-  let nodeCount = 0;
-  let loopCount = 0;
-  let doubleDirCount = 0;
-  let edgeNumber = 1;
+    const nodo = document.createElement("div");
+    nodo.style.width = "30px";
+    nodo.style.height = "30px";
+    nodo.style.borderRadius = "50%";
+    nodo.style.background = "green";
+    nodo.style.position = "absolute";
 
-  const maxNodes = 10;
-  const maxLoops = 5;
-  const maxDoubleDir = 7;
+    nodo.style.left = e.pageX + "px";
+    nodo.style.top = e.pageY + "px";
 
-  const labels = "ABCDEFGHIJ";
+    document.body.appendChild(nodo);
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("width", "100%");
-  svg.setAttribute("height", "100%");
-  svg.style.position = "absolute";
-  svg.style.top = "0";
-  svg.style.left = "0";
-  svg.style.pointerEvents = "none";
-  canvas.appendChild(svg);
-
-  function createNode(x, y) {
-    if (nodeCount >= maxNodes) return;
-
-    const node = document.createElement("div");
-    node.classList.add("node");
-
-    node.innerText = labels[nodeCount];
-
-    node.style.left = ${x - 21}px;
-    node.style.top = ${y - 21}px;
-
-    canvas.appendChild(node);
-
-    const nodeData = { element: node, x, y };
-    nodes.push(nodeData);
-
-    nodeCount++;
-
-    node.addEventListener("click", (e) => {
-      e.stopPropagation();
-      handleNodeClick(nodeData);
-    });
-  }
-
-  function drawArrow(from, to, curveValue) {
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-
-    const cx = from.x + dx * 0.5 - dy * curveValue;
-    const cy = from.y + dy * 0.5 + dx * curveValue;
-
-    const d = M ${from.x} ${from.y} Q ${cx} ${cy} ${to.x} ${to.y};
-
-    path.setAttribute("d", d);
-    path.setAttribute("stroke", "yellow");
-    path.setAttribute("stroke-width", "3");
-    path.setAttribute("fill", "none");
-
-    svg.appendChild(path);
-
-    const arrowHead = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-
-    arrowHead.setAttribute("points", `
-      ${to.x},${to.y}
-      ${to.x - 10},${to.y - 6}
-      ${to.x - 10},${to.y + 6}
-    `);
-
-    arrowHead.setAttribute("fill", "yellow");
-    svg.appendChild(arrowHead);
-
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", cx);
-    text.setAttribute("y", cy);
-    text.setAttribute("fill", "white");
-    text.setAttribute("font-size", "16");
-    text.setAttribute("font-weight", "bold");
-    text.textContent = edgeNumber;
-
-    svg.appendChild(text);
-
-    edgeNumber++;
-  }
-
-  function drawLoop(node) {
-    if (loopCount >= maxLoops) return;
-
-    const loop = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-
-    loop.setAttribute("cx", node.x + 25);
-    loop.setAttribute("cy", node.y - 25);
-    loop.setAttribute("r", "18");
-
-    loop.setAttribute("stroke", "orange");
-    loop.setAttribute("stroke-width", "3");
-    loop.setAttribute("fill", "none");
-
-    svg.appendChild(loop);
-
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", node.x + 20);
-    text.setAttribute("y", node.y - 50);
-    text.setAttribute("fill", "white");
-    text.setAttribute("font-size", "16");
-    text.setAttribute("font-weight", "bold");
-    text.textContent = edgeNumber;
-
-    svg.appendChild(text);
-
-    edgeNumber++;
-    loopCount++;
-  }
-
-  function handleNodeClick(node) {
-    if (!selectedNode) {
-      selectedNode = node;
-      node.element.style.background = "red";
-    } else {
-      if (selectedNode === node) {
-        drawLoop(node);
-      } else {
-        if (doubleDirCount < maxDoubleDir) {
-          drawArrow(selectedNode, node, 0.3);
-          drawArrow(node, selectedNode, -0.3);
-          doubleDirCount++;
-        } else {
-          drawArrow(selectedNode, node, 0.2);
-        }
-      }
-
-      selectedNode.element.style.background = "lime";
-      selectedNode = null;
-    }
-  }
-
-  canvas.addEventListener("click", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    createNode(e.clientX - rect.left, e.clientY - rect.top);
-  });
-
-  clearBtn.addEventListener("click", () => {
-    nodes = [];
-    selectedNode = null;
-    nodeCount = 0;
-    loopCount = 0;
-    doubleDirCount = 0;
-    edgeNumber = 1;
-
-    svg.innerHTML = "";
-    document.querySelectorAll(".node").forEach(n => n.remove());
   });
 </script>
 
